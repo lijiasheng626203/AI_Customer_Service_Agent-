@@ -1,0 +1,5 @@
+# Replace support.example.com with a domain whose A record points to the server.
+# Only ports 80 and 443 need public access.
+support.example.com {
+    reverse_proxy 127.0.0.1:8000
+}

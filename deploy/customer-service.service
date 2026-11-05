@@ -1,0 +1,17 @@
+[Unit]
+Description=Yunshan Care portfolio demo
+Wants=network-online.target
+After=network-online.target ollama.service
+
+[Service]
+Type=simple
+User=customerai
+Group=customerai
+WorkingDirectory=/opt/customer-service
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/opt/customer-service/.venv/bin/uvicorn api:app --host 127.0.0.1 --port 8000 --workers 1 --limit-concurrency 8
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

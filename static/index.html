@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>云杉数码 · 智能售后工作台</title>
+  <style>
+    :root {
+      --ink: #183333;
+      --muted: #75827e;
+      --line: #e8ebe5;
+      --teal: #167c73;
+      --teal-dark: #11655f;
+      --surface: #fff;
+      --bg: #f4f4ee;
+      --shadow: 0 14px 40px rgba(34, 57, 48, .07);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--bg);
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+    }
+
+    button, textarea { font: inherit; }
+    button { cursor: pointer; }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr) 285px;
+      gap: 16px;
+      padding: 16px;
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      padding: 23px 15px;
+      color: #f3f7f2;
+      background: #183c40;
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+    }
+
+    .brand {
+      margin: 4px 8px 6px;
+      font: 23px Georgia, serif;
+    }
+
+    .brand-sub {
+      margin: 0 8px 25px;
+      color: #aac4bc;
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    .nav-label {
+      margin: 14px 0 8px;
+      padding: 0 10px;
+      color: #94b4ac;
+      font-size: 11px;
+      letter-spacing: 1.5px;
+    }
+
+    .nav-item {
+      width: 100%;
+      margin: 3px 0;
+      padding: 11px 12px;
+      color: #d8e7e1;
+      text-align: left;
+      background: transparent;
+      border: 0;
+      border-radius: 11px;
+      font-size: 13px;
+    }
+
+    .nav-item:hover { background: #21494d; }
+
+    .nav-item.active {
+      color: white;
+      background: #28565a;
+      box-shadow: inset 3px 0 #8dd0b7;
+    }
+
+    .sidebar-note {
+      margin-top: auto;
+      padding: 13px;
+      color: #c3d8d0;
+      border: 1px solid #41656a;
+      border-radius: 13px;
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    .main { min-width: 0; }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 4px 16px;
+    }
+
+    .eyebrow {
+      color: var(--teal);
+      font-size: 11px;
+      letter-spacing: 1.6px;
+    }
+
+    h1 {
+      margin: 5px 0 0;
+      font: 600 25px Georgia, "Microsoft YaHei", serif;
+    }
+
+    .badge {
+      padding: 8px 12px;
+      color: #28745d;
+      background: #e1f0e7;
+      border-radius: 999px;
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .intro {
+      margin-bottom: 15px;
+      padding: 19px 21px;
+      background: linear-gradient(115deg, #f7f4e9, #e6f1e8);
+      border: 1px solid #e7e9df;
+      border-radius: 18px;
+    }
+
+    .intro h2 {
+      margin: 0 0 7px;
+      font: 600 18px Georgia, "Microsoft YaHei", serif;
+    }
+
+    .intro p {
+      margin: 0;
+      color: #687873;
+      font-size: 12px;
+      line-height: 1.8;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 17px;
+      box-shadow: var(--shadow);
+    }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 180px minmax(0, 1fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .quick { padding: 16px 13px; }
+
+    .section-title {
+      margin: 0 0 5px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .hint, .panel-desc {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    .quick-btn {
+      width: 100%;
+      margin: 5px 0;
+      padding: 10px;
+      color: #40534e;
+      text-align: left;
+      background: #fafbf8;
+      border: 1px solid #edf0e9;
+      border-radius: 10px;
+      font-size: 11px;
+      line-height: 1.5;
+    }
+
+    .quick-btn:hover { border-color: #9bc9b9; background: #f1f8f3; }
+
+    .chat-card { overflow: hidden; }
+
+    .chat-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid #f0f1ec;
+    }
+
+    .chat-head p {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .ready {
+      padding: 6px 9px;
+      color: #238066;
+      background: #e9f5ee;
+      border-radius: 999px;
+      font-size: 10px;
+      white-space: nowrap;
+    }
+
+    .messages {
+      min-height: 310px;
+      max-height: 48vh;
+      overflow-y: auto;
+      padding: 17px;
+      background: #fffefa;
+    }
+
+    .message {
+      max-width: 90%;
+      margin: 0 0 12px;
+      padding: 12px 14px;
+      border-radius: 13px;
+      font-size: 13px;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .message.bot {
+      background: #f1f5ef;
+      border: 1px solid #e8eee5;
+      border-top-left-radius: 4px;
+    }
+
+    .message.user {
+      margin-left: auto;
+      color: white;
+      background: var(--teal);
+      border-top-right-radius: 4px;
+    }
+
+    .message.error {
+      color: #9b3933;
+      background: #fff0ee;
+      border: 1px solid #f5d7d3;
+    }
+
+    .composer {
+      padding: 13px;
+      border-top: 1px solid #f0f1ec;
+    }
+
+    textarea {
+      display: block;
+      width: 100%;
+      min-height: 76px;
+      resize: vertical;
+      padding: 12px;
+      color: var(--ink);
+      border: 1px solid #e3e8df;
+      border-radius: 12px;
+      outline: none;
+      font-size: 13px;
+    }
+
+    textarea:focus { border-color: #7eb7a3; }
+
+    .composer-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 9px;
+    }
+
+    .demo-label { color: #88948d; font-size: 10px; }
+    .actions { display: flex; gap: 8px; }
+
+    .send, .clear {
+      padding: 9px 14px;
+      border: 0;
+      border-radius: 9px;
+      font-size: 12px;
+    }
+
+    .send { color: white; background: var(--teal); }
+    .send:hover { background: var(--teal-dark); }
+    .send:disabled { opacity: .55; cursor: wait; }
+    .clear { color: #53635d; background: #f0f2ed; }
+
+    .right {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      padding-top: 67px;
+    }
+
+    .panel { padding: 16px; }
+
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f1ec;
+      font-size: 11px;
+    }
+
+    .status-row:last-child { padding-bottom: 0; border-bottom: 0; }
+    .status-value { color: #258067; }
+
+    .trace-box {
+      margin-top: 12px;
+      padding: 12px;
+      color: #75827e;
+      background: #f8f8f4;
+      border-radius: 11px;
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    .trace-event {
+      padding: 10px 0;
+      border-bottom: 1px solid #e9ece5;
+    }
+
+    .trace-event:last-child { padding-bottom: 0; border-bottom: 0; }
+
+    .trace-event strong {
+      display: block;
+      margin-bottom: 4px;
+      color: #315d55;
+      font-size: 11px;
+    }
+
+    .trace-event p {
+      margin: 0;
+      color: #687873;
+      font-size: 11px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .content-card { padding: 20px; }
+
+    .content-card h2 {
+      margin: 0 0 7px;
+      font-size: 17px;
+    }
+
+    .content-card > p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.8;
+    }
+
+    .doc-list, .feature-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .doc-item, .feature-item {
+      padding: 13px 14px;
+      background: #fafbf8;
+      border: 1px solid #edf0e9;
+      border-radius: 12px;
+    }
+
+    .doc-item strong, .feature-item strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+
+    .doc-item span, .feature-item span {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    .doc-button {
+      width: 100%;
+      color: var(--ink);
+      text-align: left;
+      font: inherit;
+    }
+
+    .doc-button:hover { border-color: #9bc9b9; background: #f1f8f3; }
+
+    .doc-preview {
+      margin-top: 15px;
+      padding: 15px;
+      background: #f8faf6;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    .doc-preview h3 { margin: 0 0 10px; font-size: 13px; }
+
+    .doc-preview pre {
+      max-height: 70vh;
+      overflow: auto;
+      margin: 0;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      font: 12px/1.8 "Microsoft YaHei", "PingFang SC", sans-serif;
+    }
+
+    .notice {
+      margin-top: 15px;
+      padding: 12px 14px;
+      color: #6c6654;
+      background: #f7f3e8;
+      border-radius: 11px;
+      font-size: 11px;
+      line-height: 1.7;
+    }
+
+    .footer {
+      padding-top: 14px;
+      color: #88948d;
+      text-align: center;
+      font-size: 10px;
+    }
+
+    @media (max-width: 1100px) {
+      .app { grid-template-columns: 190px minmax(0, 1fr); }
+      .right {
+        grid-column: 2;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        padding-top: 0;
+      }
+      .workspace { grid-template-columns: 165px minmax(0, 1fr); }
+    }
+
+    @media (max-width: 720px) {
+      .app { display: block; padding: 10px; }
+      .sidebar { display: block; margin-bottom: 12px; padding: 15px; }
+      .brand-sub, .nav-label, .sidebar-note { display: none; }
+      .nav-item { width: auto; }
+      .topbar { padding: 10px 3px 14px; }
+      h1 { font-size: 21px; }
+      .workspace { display: flex; flex-direction: column; }
+      .quick, .chat-card { width: 100%; }
+      .quick { order: 2; }
+      .chat-card { order: 1; }
+      .right { display: grid; grid-template-columns: 1fr; margin-top: 12px; }
+      .messages { max-height: 50vh; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">YUNSHAN · CARE</div>
+      <div class="brand-sub">多功能智能售后客服<br>个人作品集演示平台</div>
+
+      <div class="nav-label">WORKSPACE</div>
+      <button class="nav-item active" data-page="workbench">◉　客服工作台</button>
+      <button class="nav-item" data-page="knowledge">▤　知识库</button>
+      <button class="nav-item" data-page="diagnostics">⌁　Agent 运行诊断</button>
+      <button class="nav-item" data-page="overview">⚙　项目概览</button>
+
+      <div class="sidebar-note">
+        演示环境<br>
+        云杉数码为虚构演示品牌。订单、商品和政策均为示例数据，不代表真实交易。
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">Customer Care Agent</div>
+          <h1 id="pageTitle">智能售后工作台</h1>
+        </div>
+        <div class="badge">● 本地模型 · Ollama</div>
+      </header>
+
+      <section class="intro">
+        <h2>让每一次售后咨询都有依据</h2>
+        <p>基于 LangGraph 的客服 Agent 演示。支持售后政策问答、订单与商品示例查询，以及本地知识库检索。</p>
+      </section>
+
+      <section class="page active" id="page-workbench">
+        <div class="workspace">
+          <section class="card quick">
+            <h3 class="section-title">快捷问题</h3>
+            <p class="hint">点击问题可直接发送给客服</p>
+            <button class="quick-btn">订单 10001 到哪里了？</button>
+            <button class="quick-btn">签收后几天内可以申请退货？</button>
+            <button class="quick-btn">AirPods Pro 有库存吗？</button>
+            <button class="quick-btn">请介绍一下云杉数码</button>
+            <button class="quick-btn">我想申请退款，需要怎么做？</button>
+          </section>
+
+          <section class="card chat-card">
+            <div class="chat-head">
+              <div>
+                <h3 class="section-title">会话窗口</h3>
+                <p>通过本地 Agent 处理问题；演示数据不代表真实业务。</p>
+              </div>
+              <span class="ready" id="chatStatus">就绪</span>
+            </div>
+
+            <div class="messages" id="messages" aria-live="polite">
+              <div class="message bot">你好，我是云杉数码智能售后客服演示助手。你可以咨询订单、商品、退换货政策或项目资料。</div>
+            </div>
+
+            <div class="composer">
+              <textarea id="question" placeholder="输入你的问题，例如：订单 10001 的状态是什么？"></textarea>
+              <div class="composer-bottom">
+                <span class="demo-label">虚构演示商家 · 本地 Ollama 模型</span>
+                <div class="actions">
+                  <button class="clear" id="clearBtn">新建会话</button>
+                  <button class="send" id="sendBtn">发送消息</button>
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+     <section class="page" id="page-knowledge">
+  <div class="card content-card">
+    <h2>知识库文档</h2>
+    <p>以下是项目当前知识库中的演示资料。聊天时，RAG 会检索这些文本作为业务问答依据。</p>
+
+    <div class="doc-list" id="knowledgeDocList">
+      <div class="doc-item">
+        <strong>正在读取知识库…</strong>
+        <span>请稍候</span>
+      </div>
+    </div>
+
+    <div class="doc-preview" id="knowledgePreview" hidden>
+      <h3 id="knowledgePreviewTitle"></h3>
+      <pre id="knowledgePreviewContent"></pre>
+    </div>
+
+    <div class="notice">
+      此页面实时读取文档清单，不提供上传或在线编辑功能。修改知识库文件后，需要重启 FastAPI 服务，客服才会重新建立内存检索索引。
+    </div>
+  </div>
+</section>
+
+
+      <section class="page" id="page-diagnostics">
+        <div class="card content-card">
+          <h2>Agent 运行诊断</h2>
+          <p>这里显示最近一次聊天请求返回的工具决策和工具结果。当前不记录历史请求，也不展示未经测量的耗时或准确率。</p>
+          <div class="trace-box" id="traceFull">等待发送问题。请先到“客服工作台”发送一条消息。</div>
+        </div>
+      </section>
+
+      <section class="page" id="page-overview">
+        <div class="card content-card">
+          <h2>项目概览</h2>
+          <p>多功能智能售后 AI 客服个人作品集演示项目。当前业务数据为本地示例数据，尚未连接真实电商平台。</p>
+          <div class="feature-list">
+            <div class="feature-item"><strong>Agent 工作流</strong><span>LangGraph 管理模型对话和工具调用。</span></div>
+            <div class="feature-item"><strong>本地模型</strong><span>Ollama 运行 qwen2.5:3b 聊天模型及 nomic-embed-text 向量模型。</span></div>
+            <div class="feature-item"><strong>知识库检索</strong><span>FAISS 向量索引本地文本资料，为售后和项目资料问答提供依据。</span></div>
+            <div class="feature-item"><strong>业务工具</strong><span>当前包含订单、商品、售后政策和知识库查询；部分数据写在代码中，仅供演示。</span></div>
+            <div class="feature-item"><strong>网页接口</strong><span>FastAPI 提供网页、健康检查和聊天接口。</span></div>
+          </div>
+          <div class="notice">当前尚未实现真实物流查询、工单创建、人工转接、会话持久化和公开服务器部署。</div>
+        </div>
+      </section>
+
+      <div class="footer">个人作品集项目 · 当前使用示例业务数据</div>
+    </main>
+
+    <aside class="right">
+      <section class="card panel">
+        <h3 class="section-title">服务状态</h3>
+        <p class="panel-desc">当前工作台连接本机运行的 Agent 服务。</p>
+       <div class="status-row">
+  <span>网页 API</span>
+  <span class="status-value" id="apiStatus">检查中</span>
+</div>
+<div class="status-row">
+  <span>Ollama 服务</span>
+  <span class="status-value" id="ollamaStatus">检查中</span>
+</div>
+<div class="status-row">
+  <span>聊天模型</span>
+  <span class="status-value" id="chatModelStatus">读取中</span>
+</div>
+<div class="status-row">
+  <span>知识库向量</span>
+  <span class="status-value" id="embeddingModelStatus">读取中</span>
+</div>
+<div class="status-row">
+  <span>知识库文档</span>
+  <span class="status-value" id="knowledgeDocStatus">读取中</span>
+</div>
+      </section>
+
+      <section class="card panel">
+        <h3 class="section-title">最近运行轨迹</h3>
+        <p class="panel-desc">发送问题后显示本次请求的真实工具调用。</p>
+        <div class="trace-box" id="traceInfo">等待发送问题。当前不会伪造 Agent 执行轨迹。</div>
+      </section>
+    </aside>
+  </div>
+
+  <script>
+    const messages = document.getElementById("messages");
+    const question = document.getElementById("question");
+    const sendBtn = document.getElementById("sendBtn");
+    const chatStatus = document.getElementById("chatStatus");
+    const apiStatus = document.getElementById("apiStatus");
+    const traceInfo = document.getElementById("traceInfo");
+    const traceFull = document.getElementById("traceFull");
+    const pageTitle = document.getElementById("pageTitle");
+
+
+    const sessionStorageKey = "yunshanCustomerSessionId";
+
+function createSessionId() {
+  if (window.crypto && window.crypto.randomUUID) {
+    return window.crypto.randomUUID();
+  }
+
+  return `session-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+let sessionId = sessionStorage.getItem(sessionStorageKey);
+
+if (!sessionId) {
+  sessionId = createSessionId();
+  sessionStorage.setItem(sessionStorageKey, sessionId);
+}
+
+    const pageTitles = {
+      workbench: "智能售后工作台",
+      knowledge: "知识库",
+      diagnostics: "Agent 运行诊断",
+      overview: "项目概览"
+    };
+
+    function showPage(name) {
+      document.querySelectorAll(".page").forEach(page => {
+        page.classList.toggle("active", page.id === `page-${name}`);
+      });
+
+      document.querySelectorAll(".nav-item").forEach(button => {
+        button.classList.toggle("active", button.dataset.page === name);
+      });
+
+      pageTitle.textContent = pageTitles[name] || "智能售后工作台";
+    }
+
+    document.querySelectorAll(".nav-item").forEach(button => {
+      button.addEventListener("click", () => showPage(button.dataset.page));
+    });
+
+    function addMessage(text, role) {
+      const bubble = document.createElement("div");
+      bubble.className = `message ${role}`;
+      bubble.textContent = text;
+      messages.appendChild(bubble);
+      messages.scrollTop = messages.scrollHeight;
+      return bubble;
+    }
+
+    function renderTrace(container, events) {
+      container.replaceChildren();
+
+      if (!Array.isArray(events) || events.length === 0) {
+        container.textContent = "本次请求没有返回工具调用轨迹。";
+        return;
+      }
+
+      events.forEach(event => {
+        const item = document.createElement("div");
+        item.className = "trace-event";
+
+        const title = document.createElement("strong");
+        title.textContent = event.step;
+
+        const detail = document.createElement("p");
+        detail.textContent = event.detail;
+
+        item.append(title, detail);
+        container.appendChild(item);
+      });
+    }
+
+    async function loadSystemData() {
+      const setStatus = (id, value, healthy = true) => {
+        const element = document.getElementById(id);
+        if (!element) return;
+        element.textContent = value;
+        element.style.color = healthy ? "#258067" : "#b44b43";
+      };
+
+      try {
+        const [healthResponse, statusResponse, knowledgeResponse] =
+          await Promise.all([
+            fetch("/health"),
+            fetch("/system/status"),
+            fetch("/knowledge-base")
+          ]);
+
+        if (!healthResponse.ok || !statusResponse.ok || !knowledgeResponse.ok) {
+          throw new Error("服务接口返回错误");
+        }
+
+        const systemData = await statusResponse.json();
+        const knowledgeData = await knowledgeResponse.json();
+        setStatus("apiStatus", "在线");
+
+        const ollamaOnline = systemData.ollama === "online";
+        setStatus("ollamaStatus", ollamaOnline ? "在线" : "离线", ollamaOnline);
+        setStatus(
+          "chatModelStatus",
+          `${systemData.chat_model} · ${systemData.chat_model_installed ? "已安装" : "未安装"}`,
+          systemData.chat_model_installed
+        );
+        setStatus(
+          "embeddingModelStatus",
+          `${systemData.embedding_model} · ${systemData.embedding_model_installed ? "已安装" : "未安装"}`,
+          systemData.embedding_model_installed
+        );
+
+        const documents = Array.isArray(knowledgeData.documents)
+          ? knowledgeData.documents : [];
+        setStatus("knowledgeDocStatus", `${documents.length} 份文档`);
+        const list = document.getElementById("knowledgeDocList");
+        list.replaceChildren();
+        if (documents.length === 0) {
+          const item = document.createElement("div");
+          item.className = "doc-item";
+          item.textContent = "knowledge_base 文件夹中没有 TXT 文档。";
+          list.appendChild(item);
+        } else {
+          documents.forEach(documentInfo => {
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "doc-item doc-button";
+            const title = document.createElement("strong");
+            title.textContent = documentInfo.name;
+            const detail = document.createElement("span");
+            const bytes = documentInfo.size_bytes || 0;
+            const size = bytes < 1024
+              ? `${bytes} B` : `${(bytes / 1024).toFixed(1)} KB`;
+            detail.textContent = `文件大小：${size}`;
+            item.append(title, detail);
+            item.addEventListener("click", () => showKnowledgePreview(documentInfo.name));
+            list.appendChild(item);
+          });
+        }
+      } catch (error) {
+        setStatus("apiStatus", "未连接", false);
+        setStatus("ollamaStatus", "状态未知", false);
+        setStatus("chatModelStatus", "状态未知", false);
+        setStatus("embeddingModelStatus", "状态未知", false);
+        setStatus("knowledgeDocStatus", "读取失败", false);
+        const list = document.getElementById("knowledgeDocList");
+        list.textContent = "知识库清单读取失败，请检查 API 服务。";
+        console.error("读取服务状态或知识库清单失败：", error);
+      }
+    }
+
+    async function showKnowledgePreview(filename) {
+      const panel = document.getElementById("knowledgePreview");
+      const title = document.getElementById("knowledgePreviewTitle");
+      const content = document.getElementById("knowledgePreviewContent");
+      panel.hidden = false;
+      title.textContent = filename;
+      content.textContent = "正在读取文档…";
+
+      try {
+        const response = await fetch(`/knowledge-base/${encodeURIComponent(filename)}`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "读取失败");
+        content.textContent = data.content + (data.truncated ? "\n\n〔预览仅显示前 12000 字〕" : "");
+      } catch (error) {
+        content.textContent = `无法预览文档：${error.message}`;
+      }
+    }
+
+    async function sendMessage(text = question.value) {
+      const message = text.trim();
+      if (!message || sendBtn.disabled) return;
+
+      addMessage(message, "user");
+      question.value = "";
+      sendBtn.disabled = true;
+      chatStatus.textContent = "处理中…";
+      traceInfo.textContent = "Agent 正在处理请求…";
+      traceFull.textContent = "Agent 正在处理请求…";
+
+      const pending = addMessage("正在查询，请稍候…", "bot");
+
+      try {
+        const response = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+         body: JSON.stringify({
+  message,
+  session_id: sessionId
+})
+        });
+
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || "请求失败");
+
+        pending.textContent = data.answer;
+        chatStatus.textContent = "已完成";
+        renderTrace(traceInfo, data.trace);
+        renderTrace(traceFull, data.trace);
+      } catch (error) {
+        pending.className = "message error";
+        pending.textContent = `连接客服服务失败：${error.message}。请确认 FastAPI 和 Ollama 服务仍在运行。`;
+        chatStatus.textContent = "连接异常";
+        traceInfo.textContent = "请求失败。请检查本地 API 和 Ollama 服务。";
+        traceFull.textContent = "请求失败。请检查本地 API 和 Ollama 服务。";
+      } finally {
+        sendBtn.disabled = false;
+        question.focus();
+      }
+    }
+
+    document.getElementById("sendBtn").addEventListener("click", () => sendMessage());
+
+    question.addEventListener("keydown", event => {
+      if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+
+    document.querySelectorAll(".quick-btn").forEach(button => {
+      button.addEventListener("click", () => sendMessage(button.textContent));
+    });
+
+   document.getElementById("clearBtn").addEventListener("click", async () => {
+  try {
+    await fetch(`/sessions/${encodeURIComponent(sessionId)}`, {
+      method: "DELETE"
+    });
+  } catch (error) {
+    console.warn("清除服务器会话失败：", error);
+  }
+
+  sessionId = createSessionId();
+  sessionStorage.setItem(sessionStorageKey, sessionId);
+
+  messages.replaceChildren();
+  addMessage("新会话已开始。你可以咨询订单、商品、售后政策或项目资料。", "bot");
+  chatStatus.textContent = "就绪";
+  traceInfo.textContent = "等待发送问题。";
+  traceFull.textContent = "等待发送问题。请先到“客服工作台”发送一条消息。";
+  question.focus();
+});
+
+loadSystemData();
+setInterval(loadSystemData, 15000);
+  </script>
+</body>
+</html>
